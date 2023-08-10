@@ -5,3 +5,8 @@ peerLedger/
 ordererLedger/
 simplechannel.block
 simple-genesis.block
+chaincode-typescript/node_modules/
+chaincode-typescript/dist/
+chaincode-external/code.tar.gz
+chaincode-external/external-chaincode.tgz
+*.gz
