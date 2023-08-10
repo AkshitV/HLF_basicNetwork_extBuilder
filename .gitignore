@@ -1,6 +1,7 @@
-./crypto-config
-./simple-channel.tx
-./simple-genesis.tx
-./peerLedger
-./ordererLedger
-./simplechannel.block
+crypto-config/
+simple-channel.tx
+simple-genesis.tx
+peerLedger/
+ordererLedger/
+simplechannel.block
+simple-genesis.block
