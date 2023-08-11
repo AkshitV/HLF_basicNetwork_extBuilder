@@ -1,5 +1,4 @@
 
-# Overview
 - [Overview](#overview)
 - [Prereqs](#prereqs)
   - [To run the chaincode as a service](#to-run-the-chaincode-as-a-service)
@@ -10,7 +9,9 @@
   - [Interact with the chaincode](#interact-with-the-chaincode)
 - [Stopping the network](#stopping-the-network)
 
-Basic network with an external chaincode 
+# Overview
+
+Basic network with an external chaincode.
 
 # Prereqs
 
@@ -57,6 +58,7 @@ Package and install the external chaincode on peer1 with the following simple co
 In terminal 3 :
 
 ```shell
+
 cd chaincode-external
 
 tar cfz code.tar.gz connection.json
@@ -64,7 +66,15 @@ tar cfz external-chaincode.tgz metadata.json code.tar.gz
 
 cd ..
 
-$BIN_PATH/peer lifecycle chaincode install chaincode-external/external-chaincode.tgz
+export BIN_PATH=../fabric-samples/bin
+export CONFIG_DIRECTORY=$PWD
+export FABRIC_CFG_PATH=./
+export FABRIC_LOGGING_SPEC=INFO
+export CORE_PEER_LISTENADDRESS=localhost:7051
+export CORE_PEER_ADDRESS=localhost:7051
+export CORE_PEER_FILESYSTEMPATH=$PWD/peerLedger/
+export CORE_PEER_MSPCONFIGPATH=./crypto-config/peerOrganizations/simple.com/users/Admin@simple.com/msp
+export CORE_LEDGER_STATE_STATEDATABASE=goleveldb
 
 $BIN_PATH/peer lifecycle chaincode install $PWD/chaincode-external/external-chaincode.tgz
 
@@ -75,9 +85,11 @@ export CHAINCODE_ID=$($BIN_PATH/peer lifecycle chaincode calculatepackageid chai
 In terminal 4, navigate to `/chaincode-typescript` and build the chaincode::
 
 ```shell
-export BIN_PATH=../fabric-samples/bin
-
-export CHAINCODE_ID=$($BIN_PATH/peer lifecycle chaincode calculatepackageid chaincode-external/external-chaincode.tgz) && echo $CHAINCODE_ID
+export BIN_PATH=../../fabric-samples/bin
+export CORE_PEER_MSPCONFIGPATH=../crypto-config/peerOrganizations/simple.com/users/Admin@simple.com/msp
+export CONFIG_DIRECTORY=../
+export FABRIC_CFG_PATH=../
+export CHAINCODE_ID=$($BIN_PATH/peer lifecycle chaincode calculatepackageid ../chaincode-external/external-chaincode.tgz) && echo $CHAINCODE_ID
 ```
 
 ```shell
@@ -85,15 +97,11 @@ npm install
 npm run build
 ```
 
-Set the chaincode server address:
+Set the chaincode server address and start the chaincode service:
+:
 
 ```shell
 export CHAINCODE_SERVER_ADDRESS=127.0.0.1:9999
-```
-
-And start the chaincode service:
-
-```shell
 npm run start:server-nontls
 ```
 
@@ -102,22 +110,28 @@ npm run start:server-nontls
 In terminal 3, approve and commit the chaincode (only a single approver is required based on the lifecycle endorsement policy of any organization):
 
 ```shell
-$BIN_PATH/peer lifecycle chaincode install chaincode-external/external-chaincode.tgz
 
-$BIN_PATH/peer lifecycle chaincode install $PWD/chaincode-external/external-chaincode.tgz
+$BIN_PATH/peer lifecycle chaincode approveformyorg --channelID simplechannel --name basic --version 1 --package-id $CHAINCODE_ID --sequence 1 
+
+$BIN_PATH/peer lifecycle chaincode commit --channelID simplechannel --name basic --version 1 --sequence 1 
+
+
 ```
 
 ## Interact with the chaincode
 
-Invoke the chaincode to create an asset (only a single endorser is required based on the default endorsement policy of any organization).
+In terminal 3, invoke the chaincode to create an asset (only a single endorser is required based on the default endorsement policy of any organization).
 Then query the asset, update it, and query again to see the resulting asset changes on the ledger. Note that you need to wait a bit for invoke transactions to complete.
 
 ``` shell
-export BIN_PATH=../fabric-samples/bin
 
-$BIN_PATH/peer chaincode invoke -C simplechannel -n basic -c '{"Args":["CreateAsset","1","blue","35","tom","1000"]}' --waitForEvent 
+$BIN_PATH/peer chaincode invoke -C simplechannel -n basic -c '{"Args":["createShipment","shipment1","Manufacturer","Wholeseller","France"]}' --waitForEvent 
 
-$BIN_PATH/peer chaincode query -C simplechannel -n basic -c '{"Args":["ReadAsset","1"]}'
+$BIN_PATH/peer chaincode query -C simplechannel -n basic -c '{"Args":["queryShipment","shipment1"]}'
+
+$BIN_PATH/peer chaincode invoke -C simplechannel -n basic -c '{"Args":["updateShipmentStatus","shipment1","Received by Wholeseller", "Germany"]}' --waitForEvent 
+
+$BIN_PATH/peer chaincode query -C simplechannel -n basic -c '{"Args":["queryShipment","shipment1"]}'
 
 ```
 
