@@ -1,0 +1,12 @@
+crypto-config/
+simple-channel.tx
+simple-genesis.tx
+peerLedger/
+ordererLedger/
+simplechannel.block
+simple-genesis.block
+chaincode-typescript/node_modules/
+chaincode-typescript/package-lock.json
+chaincode-external/code.tar.gz
+chaincode-external/external-chaincode.tgz
+*.gz
